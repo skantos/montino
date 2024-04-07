@@ -13,6 +13,7 @@ import { storage } from "../database/firebase";
 const CrearLista = () => {
     const navigation = useNavigation();
     const [state, setState] = useState({
+        idProducto:'',
         nombreProducto: '',
         categoria: '',
         precio: '',
@@ -76,7 +77,7 @@ const CrearLista = () => {
 
     const GuardarProducto = async () => {
         try {
-            if (!state.nombreProducto || !state.categoria || !state.precio) {
+            if (!state.idProducto || !state.nombreProducto || !state.categoria || !state.precio) {
                 Alert.alert('Campos obligatorios', 'Por favor, complete todos los campos obligatorios.');
                 return;
             }
@@ -87,6 +88,7 @@ const CrearLista = () => {
             const precioOferta = state.precioOferta ? parseFloat(state.precioOferta) : null;
     
             const producto = {
+                idProducto: state.idProducto, // Agregar el ID único al objeto del producto
                 nombreProducto: state.nombreProducto,
                 categoria: state.categoria,
                 precio: precio,
@@ -99,6 +101,7 @@ const CrearLista = () => {
     
             // Limpiar los campos después de agregar el producto
             setState({
+                idProducto: '', // Limpiar el ID único
                 nombreProducto: '',
                 categoria: '',
                 precio: '',
@@ -125,6 +128,17 @@ const CrearLista = () => {
                 <Button title="Crear Categoría" onPress={() => navigation.navigate('categoria')} />
             </View>
 
+
+            <View style={styles.inputContainer}>
+                <Text>ID</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="ID"
+                    keyboardType="numeric"
+                    value={state.idProducto}  // Agrega esta línea
+                    onChangeText={(value) => handleChangeText('idProducto', value)}
+                />
+            </View>
             <View style={styles.inputContainer}>
                 <Text>Ingrese el nombre del producto</Text>
                 <TextInput
