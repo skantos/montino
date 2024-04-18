@@ -6,15 +6,13 @@ import { getStorage } from "firebase/storage";
 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAMZj3CHnmA-wb1DUfnw-Za4q2Gnj9r3xA",
-  authDomain: "montino-13ecc.firebaseapp.com",
-  projectId: "montino-13ecc",
-  storageBucket: "montino-13ecc.appspot.com",
-  messagingSenderId: "303627333746",
-  appId: "1:303627333746:web:407a1438eb2d41daa492eb",
-  measurementId: "G-423Q83LB9C"
+  apiKey: "AIzaSyC2XMj6UMd235TDJhkigPNsyrV6yqDvCr0",
+  authDomain: "montino-c96c2.firebaseapp.com",
+  projectId: "montino-c96c2",
+  storageBucket: "montino-c96c2.appspot.com",
+  messagingSenderId: "214923027406",
+  appId: "1:214923027406:web:c0607a5528b1c6f51d819f"
 };
-
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);

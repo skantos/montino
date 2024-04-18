@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Text, View, Button, StyleSheet, Alert, TextInput } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { auth, db } from "../DB/firebase";
 
 const CreateAccount = () => {
@@ -10,6 +10,23 @@ const CreateAccount = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
+
+  useEffect(() => {
+    checkIfUsersExist();
+  }, []);
+
+  const checkIfUsersExist = async () => {
+    try {
+      const usersCollection = collection(db, 'users');
+      const querySnapshot = await getDocs(usersCollection);
+      
+      if (querySnapshot.empty) {
+        await setDoc(doc(db, 'users', 'placeholder'), { exists: true });
+      }
+    } catch (error) {
+      console.error("Error checking if users exist:", error);
+    }
+  };
 
   const handleCreateAccount = async () => {
     try {
