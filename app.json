@@ -4,10 +4,10 @@
     "slug": "montino",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/montino-sinFondo.png",
+    "icon": "./assets/Montino.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/montino-sinFondo.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
