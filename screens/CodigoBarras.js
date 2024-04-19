@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
         opacity:0.7,
     },
     buttonText: {
-        color: 'white', // Color del texto del botón
+        color: 'black', // Color del texto del botón
         textAlign: 'center', // Alineación del texto al centro
         fontWeight: 'bold', // Fuente en negrita
     },
