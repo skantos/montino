@@ -1,8 +1,11 @@
-import 'react-native-gesture-handler';
-import Navigation from './components/Navigation';
+import "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import Navigation from "./components/Routes/Navigation";
 
 export default function App() {
   return (
-    <Navigation />
+    <SafeAreaProvider>
+      <Navigation />
+    </SafeAreaProvider>
   );
 }

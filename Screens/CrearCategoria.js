@@ -1,69 +1,173 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
-import { collection, addDoc } from "firebase/firestore";
-import { db } from "../DB/firebase";
+import {
+  Text,
+  View,
+  StyleSheet,
+  Alert,
+  TextInput,
+  TouchableOpacity,
+  Image,
+} from "react-native";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { db, auth } from "../dataBase/Firebase";
 
-const CrearCategoria = () => {
-    const [categoria, setCategoria] = useState('');
+const CreateAccount = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
 
-    const handleChangeCategoria = (value) => {
-        setCategoria(value);
-    };
+  const handleCreateAccount = async () => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
 
-    const handleGuardarCategoria = async () => {
-        try {
-            if (!categoria) {
-                Alert.alert('Campo obligatorio', 'Por favor, complete el campo de categoría.');
-                return;
-            }
-    
-            const nuevaCategoria = {
-                nombreCategoria: categoria,
-            };
-    
-            await addDoc(collection(db, 'categorias'), nuevaCategoria);
-    
-            setCategoria('');
-    
-            Alert.alert('Categoría creada', 'La categoría se ha creado exitosamente.');
-        } catch (error) {
-            console.error('Error al guardar la categoría:', error);
-    
-            if (error.code === 'permission-denied') {
-                Alert.alert('Error de permisos', 'No tienes permisos para guardar la categoría.');
-            } else {
-                Alert.alert('Error', 'Hubo un error al intentar guardar la categoría.');
-            }
-        }
-    };
-    
-    return (
-        <View style={styles.container}>
-            <Text>Ingrese el nombre de la categoría</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Nombre de la categoría"
-                value={categoria}
-                onChangeText={handleChangeCategoria}
-            />
+      await setDoc(doc(db, "users", user.uid), {
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        phone: phone,
+      });
 
-            <Button title="Guardar Categoría" onPress={handleGuardarCategoria} />
-        </View>
-    );
+      Alert.alert("Success", "Account created successfully");
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
+  };
+
+  const CustomButton = ({ title, onPress }) => (
+    <TouchableOpacity style={styles.button} onPress={onPress}>
+      <Text style={styles.buttonText}>{title}</Text>
+    </TouchableOpacity>
+  );
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Crear Cuenta </Text>
+      <Text style={styles.title}>nueva</Text>
+
+      <Text style={styles.label}>Nombre</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Ingrese su Nombre"
+        value={firstName}
+        onChangeText={setFirstName}
+      />
+
+      <Text style={styles.label}>Apellido</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Ingrese su Apellido"
+        value={lastName}
+        onChangeText={setLastName}
+      />
+
+      <Text style={styles.label}>Teléfono</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="opcional"
+        value={phone}
+        onChangeText={setPhone}
+      />
+
+      <Text style={styles.label}>Correo electrónico</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="@gmail"
+        value={email}
+        onChangeText={setEmail}
+      />
+
+      <Text style={styles.label}>Contraseña</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="minimo 6 caracteres"
+        secureTextEntry={true}
+        value={password}
+        onChangeText={setPassword}
+      />
+      <CustomButton title="Crear Cuenta" onPress={handleCreateAccount} />
+
+      <View style={[styles.final]}>
+        <Image
+          source={require("../images/panta_derecha.png")}
+          style={styles.logoImagefinal}
+        />
+      </View>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        padding: 16,
-    },
-    input: {
-        height: 30,
-        borderBottomWidth: 1,
-        borderColor: 'gray',
-        paddingLeft: 8,
-        textAlignVertical: 'bottom',
-        marginBottom: 16,
-    },
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  input: {
+    height: 40,
+    width: "80%",
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+    backgroundColor: "#D4D4D4",
+  },
+  label: {
+    width: "80%",
+    paddingBottom: 5,
+    paddingTop: 5,
+  },
+  crearCuenta: {
+    width: "80%",
+    height: 40,
+    backgroundColor: "#1C2120",
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  button: {
+    width: "80%",
+    height: 40,
+    backgroundColor: "#1C2120",
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 50,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  final: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    width: "100%",
+  },
+  logoImagefinal: {
+    width: 150,
+    height: 150,
+    marginLeft: "-22%",
+    marginRight: "-20%",
+    marginTop: "-18%",
+    marginBottom: "-18%",
+  },
 });
 
-export default CrearCategoria;
+export default CreateAccount;
