@@ -1,8 +1,25 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, TextInput, TouchableOpacity, Alert, RefreshControl } from "react-native";
-import { useNavigation } from "@react-navigation/native"; 
-import { db } from "../DB/firebase";
-import { collection, getDocs, query, where, deleteDoc, doc } from 'firebase/firestore';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  ActivityIndicator,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  RefreshControl,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { db } from "../dataBase/Firebase";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 import Icon from "react-native-vector-icons/FontAwesome5";
 
 const Lista = () => {
@@ -23,7 +40,7 @@ const Lista = () => {
         queryProductos = query(
           productosCollection,
           where("nombreProducto", ">=", filtro),
-          where("nombreProducto", "<=", filtro + '\uf8ff')
+          where("nombreProducto", "<=", filtro + "\uf8ff")
         );
       }
 
@@ -65,7 +82,9 @@ const Lista = () => {
             text: "Eliminar",
             onPress: async () => {
               await deleteDoc(doc(db, "productos", id));
-              const nuevosProductos = productos.filter((producto) => producto.id !== id);
+              const nuevosProductos = productos.filter(
+                (producto) => producto.id !== id
+              );
               setProductos(nuevosProductos);
               if (productoExpandido === id) {
                 setProductoExpandido(null);
@@ -83,13 +102,13 @@ const Lista = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#1C2120" />
       </View>
     );
   }
 
   const handlePresionarProducto = (id) => {
-    setProductoExpandido((prevProductoExpandido) => 
+    setProductoExpandido((prevProductoExpandido) =>
       prevProductoExpandido === id ? null : id
     );
   };
@@ -105,7 +124,9 @@ const Lista = () => {
             <View style={styles.botonesContainer}>
               <TouchableOpacity
                 style={styles.botonActualizar}
-                onPress={() => navigation.navigate('ActualizarLista', { producto: item })}
+                onPress={() =>
+                  navigation.navigate("ActualizarLista", { producto: item })
+                }
               >
                 <Icon name="pen" size={20} color="#fff" />
               </TouchableOpacity>
@@ -126,7 +147,7 @@ const Lista = () => {
     <View style={styles.container}>
       <View style={styles.filtrosContainer}>
         <View style={styles.filtroIcono}>
-          <Icon name="search" size={20} color="#555" />
+          <Icon name="search" size={20} color="#1C2120" />
         </View>
         <TextInput
           style={styles.filtroInput}
@@ -142,10 +163,7 @@ const Lista = () => {
         keyExtractor={(item) => item.id}
         renderItem={renderizarItem}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       />
     </View>
@@ -163,9 +181,11 @@ const styles = StyleSheet.create({
     padding: 10,
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
   },
   textoContainer: {
     flex: 1,
+    paddingRight: 10,
   },
   nombre: {
     fontSize: 16,
@@ -188,7 +208,7 @@ const styles = StyleSheet.create({
   filtroInput: {
     flex: 1,
     height: 40,
-    borderColor: 'gray',
+    borderColor: "gray",
     borderWidth: 1,
     marginRight: 8,
     paddingLeft: 8,
@@ -201,15 +221,15 @@ const styles = StyleSheet.create({
   filtroIcono: {
     justifyContent: "center",
     paddingRight: 8,
-    padding: 8, 
-    borderColor: 'gray',
+    padding: 8,
+    borderColor: "gray",
     borderTopLeftRadius: 10,
-    borderBottomLeftRadius: 10, 
+    borderBottomLeftRadius: 10,
     borderWidth: 1,
   },
   botonesContainer: {
     flexDirection: "row",
-    marginVertical: 8, 
+    alignItems: "center",
   },
   botonActualizar: {
     backgroundColor: "#28a745",
@@ -220,7 +240,7 @@ const styles = StyleSheet.create({
     height: 40,
     paddingHorizontal: 10,
     marginRight: 8,
-    maxWidth: 100, 
+    maxWidth: 100,
   },
   botonEliminar: {
     backgroundColor: "#ff0000",
@@ -230,7 +250,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     height: 40,
     paddingHorizontal: 10,
-    maxWidth: 100, 
+    maxWidth: 100,
   },
 });
 

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Button, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { db } from "../dataBase/Firebase";
+import { db } from "../DB/firebase";
 import { doc, updateDoc } from "firebase/firestore";
 
 const ActualizarLista = ({ route }) => {

@@ -8,10 +8,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
-  Alert
+  Alert,
 } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../DB/firebase";
+import { auth } from "../dataBase/Firebase";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { LoginStyles } from "../styles/LoginEstilo";
@@ -27,13 +27,13 @@ const Login = () => {
 
   const handleLogin = () => {
     signInWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      const user = userCredential.user;
-    })
-    .catch(error => {
-      console.log(error);
-      Alert.alert('Correo o Contraseña incorrectos');
-    });
+      .then((userCredential) => {
+        const user = userCredential.user;
+      })
+      .catch((error) => {
+        console.log(error);
+        Alert.alert("Correo o Contraseña incorrectos");
+      });
   };
 
   useEffect(() => {
@@ -55,18 +55,24 @@ const Login = () => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={LoginStyles.centeredContainer}>
-          <Text style={LoginStyles.title}>MONTINO</Text>
-          {/* <Image
-            source={require("../images/montinoLogo-sinFondo.png")}
-            style={LoginStyles.logoImage}
-          /> */}
+          <View style={LoginStyles.headerContainer}>
+            <Text style={LoginStyles.title}>
+              Panda<Text style={LoginStyles.Subtitle}>Buy</Text>
+            </Text>
+            <Image
+              source={require("../images/panda_sin.png")}
+              style={LoginStyles.logoImage}
+            />
+          </View>
+
           <Text style={LoginStyles.headerText}>Iniciar Sesión</Text>
+
           <View style={LoginStyles.inputContainer}>
             <View style={LoginStyles.inputWrapper}>
               <Icon
                 name="envelope"
                 size={20}
-                color="#A0A0A0"
+                color="#FFFFFF"
                 style={LoginStyles.icon}
               />
               <TextInput
@@ -74,7 +80,8 @@ const Login = () => {
                 style={[
                   LoginStyles.input,
                   {
-                    borderBottomColor: emailFocused || email.length > 0 ? "#525FE1" : "#000",
+                    borderBottomColor:
+                      emailFocused || email.length > 0 ? "#1C2120" : "#1C2120",
                   },
                 ]}
                 placeholderTextColor="#A0A0A0"
@@ -88,9 +95,12 @@ const Login = () => {
                   style={[
                     LoginStyles.labelText,
                     {
-                      top: emailFocused || email.length > 0 ? -10 : 8,
+                      top: emailFocused || email.length > 0 ? -20 : 8,
                       left: 40,
-                      color: emailFocused || email.length > 0 ? "#525FE1" : "#A0A0A0",
+                      color:
+                        emailFocused || email.length > 0
+                          ? "#A0A0A0"
+                          : "#1C2120",
                     },
                   ]}
                 >
@@ -99,17 +109,25 @@ const Login = () => {
               </View>
             </View>
             <View style={LoginStyles.inputWrapper}>
-              <Icon name="lock" size={20} color="#A0A0A0" style={LoginStyles.icon} />
+              <Icon
+                name="lock"
+                size={20}
+                color="#A0A0A0"
+                style={LoginStyles.icon}
+              />
               <TextInput
                 placeholder=""
                 style={[
                   LoginStyles.input,
                   {
-                    borderBottomColor: passwordFocused || password.length > 0 ? "#525FE1" : "#000",
+                    borderBottomColor:
+                      passwordFocused || password.length > 0
+                        ? "#A0A0A0"
+                        : "#1C2120",
                   },
                 ]}
                 secureTextEntry={!showPassword}
-                placeholderTextColor="#A0A0A0"
+                placeholderTextColor="#1C2120"
                 onChangeText={(text) => setPassword(text)}
                 value={password}
                 onFocus={() => setPasswordFocused(true)}
@@ -122,17 +140,22 @@ const Login = () => {
                 <Icon
                   name={showPassword ? "eye" : "eye-slash"}
                   size={20}
-                  color="#A0A0A0"
+                  color="#1C2120"
                 />
               </TouchableOpacity>
+
               <View style={LoginStyles.labelContainer}>
                 <Text
                   style={[
                     LoginStyles.labelText,
                     {
-                      top: passwordFocused || password.length > 0 ? -10 : 8,
+                      top: passwordFocused || password.length > 0 ? -20 : 8,
                       left: 40,
-                      color: passwordFocused || password.length > 0 ? "#525FE1" : "#A0A0A0",},
+                      color:
+                        passwordFocused || password.length > 0
+                          ? "#A0A0A0"
+                          : "#1C2120",
+                    },
                   ]}
                 >
                   Contraseña
@@ -140,6 +163,7 @@ const Login = () => {
               </View>
             </View>
           </View>
+
           {errorMessage !== "" && (
             <Text style={LoginStyles.errorText}>{errorMessage}</Text>
           )}
@@ -153,16 +177,31 @@ const Login = () => {
             style={LoginStyles.buttonText}
             onPress={() => navigation.navigate("ForgotPassword")}
           >
-            <Text style={LoginStyles.forgotPasswordText}>¿Olvidaste tu contraseña?</Text>
+            <Text style={LoginStyles.forgotPasswordText}>
+              ¿Olvidaste tu contraseña?
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={LoginStyles.buttonText}
             onPress={() => navigation.navigate("CreateAccount")}
           >
-            <Text style={LoginStyles.forgotPasswordText}>¿Aun no tienes tu Cuenta?</Text>
+            <Text style={LoginStyles.forgotPasswordText}>
+              ¿Aun no tienes tu Cuenta?
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <View style={[LoginStyles.final, { justifyContent: "space-between" }]}>
+        <Image
+          source={require("../images/planta_izquierda.png")}
+          style={LoginStyles.logoImagefinal}
+        />
+        <Image
+          source={require("../images/panta_derecha.png")}
+          style={LoginStyles.logoImagefinal}
+        />
+      </View>
     </KeyboardAvoidingView>
   );
 };
