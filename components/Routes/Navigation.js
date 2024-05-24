@@ -15,7 +15,7 @@ import Lista from "../../screens/Lista";
 import ActualizarLista from "../../screens/ActualizarLista";
 import CrearCategoria from "../../screens/CrearCategoria";
 import Login from "../../screens/Login";
-import ForgotPassword from "../../screens/RecuperarContrasena";
+import ForgotPassword from "../../screens/RecuperContrasena";
 import EscanerCodigoBarras from "../../screens/CodigoBarras";
 import CrearLista from "../../screens/CrearLista";
 import Historial from "../../screens/Historial";

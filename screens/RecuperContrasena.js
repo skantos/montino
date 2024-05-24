@@ -32,7 +32,7 @@ const ForgotPassword = () => {
     <View style={LoginStyles.container}>
       <View style={LoginStyles.centeredContainer}>
         <Image
-          source={require("../images/icon.png")}
+          source={require("../images/panda_recuperar.png")}
           style={{ marginTop: -200 }}
         />
         <Text style={LoginStyles.title}>Olvidaste</Text>
