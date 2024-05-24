@@ -20,14 +20,17 @@
           "isAccessMediaLocationEnabled": "true"
         }
       ]
-    ],    
-    "assetBundlePatterns": ["**/*"],
+    ],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos",
         "NSPhotoLibraryAddUsageDescription": "Allow $(PRODUCT_NAME) to save photos"
-      }
+      },
+      "bundleIdentifier": "montino"
     },
     "android": {
       "adaptiveIcon": {
@@ -47,8 +50,9 @@
     },
     "extra": {
       "eas": {
-        "projectId": "90acd7ed-5d8e-46d1-a4b8-7b1c9df08ad6"
+        "projectId": "31ac49b8-c6f9-46ca-9e01-e63af1566313"
       }
-    }
+    },
+    "owner": "gonza96472"
   }
 }
