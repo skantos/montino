@@ -6,11 +6,56 @@ import {
   FlatList,
   TouchableOpacity,
   RefreshControl,
+  Dimensions,
 } from "react-native";
 import { db } from "../dataBase/Firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
-import { Calendar } from "react-native-calendars";
+import { Calendar, LocaleConfig } from "react-native-calendars";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+
+LocaleConfig.locales["es"] = {
+  monthNames: [
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
+  ],
+  monthNamesShort: [
+    "Ene.",
+    "Feb.",
+    "Mar.",
+    "Abr.",
+    "May.",
+    "Jun.",
+    "Jul.",
+    "Ago.",
+    "Sept.",
+    "Oct.",
+    "Nov.",
+    "Dic.",
+  ],
+  dayNames: [
+    "Domingo",
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+  ],
+  dayNamesShort: ["Dom.", "Lun.", "Mar.", "Mié.", "Jue.", "Vie.", "Sáb."],
+  today: "Hoy",
+};
+LocaleConfig.defaultLocale = "es";
 
 const Historial = () => {
   const navigation = useNavigation();
@@ -21,95 +66,40 @@ const Historial = () => {
   const [selectedDate, setSelectedDate] = useState("");
   const [refreshing, setRefreshing] = useState(false);
 
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <MaterialCommunityIcons
+          name="update"
+          size={26}
+          color="#1C2120"
+          onPress={handleRefresh}
+          style={{ marginRight: 20 }}
+        />
+      ),
+    });
+  }, [navigation]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+
+    try {
+      await fetchHistorial();
+    } catch (error) {
+      console.error("Error al refrescar el historial:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchHistorial = async () => {
-      try {
-        const historialCollection = collection(db, "historialVentas");
-        const historialSnapshot = await getDocs(historialCollection);
-        const historialData = historialSnapshot.docs.map((doc) => {
-          const data = doc.data();
-          const totalCompra = parseFloat(data.totalCompra);
-          return {
-            id: doc.id,
-            ...data,
-            totalCompra: isNaN(totalCompra) ? 0 : totalCompra,
-          };
-        });
-        setHistorialCompleto(historialData);
-        calcularTotalPorFecha(historialData);
-        calcularTotalPorMes(historialData);
-      } catch (error) {
-        console.error("Error fetching historial:", error);
-      }
-    };
     fetchHistorial();
-  }, [refreshing]);
+  }, []);
 
   useEffect(() => {
     calcularTotalPorFecha(historialFiltrado);
   }, [historialFiltrado]);
-  
-  
 
-  const calcularTotalPorFecha = (historialData) => {
-    const totalPorFecha = {};
-    historialData.forEach((item) => {
-      const fecha = formatFecha(item.fecha);
-      if (fecha === formatFecha(selectedDate)) {
-        const totalCompra = parseFloat(item.totalCompra);
-        totalPorFecha[fecha] = (totalPorFecha[fecha] || 0) + totalCompra;
-      }
-    });
-    setTotalPorFecha(totalPorFecha);
-  };
-
-  const calcularTotalPorMes = (historialData) => {
-    const totalPorMes = {};
-    historialData.forEach((item) => {
-      const fecha = new Date(item.fecha);
-      const yearMonth = fecha.getFullYear() + "-" + (fecha.getMonth() + 1);
-      if (!totalPorMes[yearMonth]) {
-        totalPorMes[yearMonth] = 0;
-      }
-      totalPorMes[yearMonth] += parseFloat(item.totalCompra);
-    });
-    setTotalPorMes(totalPorMes);
-  };
-
-  const filtrarHistorialPorFecha = (fecha) => {
-    const fechaSeleccionada = new Date(fecha);
-    const filteredHistorial = historialCompleto.filter((item) => {
-      const fechaItem = new Date(item.fecha);
-      return (
-        fechaSeleccionada.getDate() === fechaItem.getDate() &&
-        fechaSeleccionada.getMonth() === fechaItem.getMonth() &&
-        fechaSeleccionada.getFullYear() === fechaItem.getFullYear()
-      );
-    });
-    setHistorialFiltrado(filteredHistorial);
-    calcularTotalPorFecha(filteredHistorial);
-  };
-  
-  const handleDateSelect = (date) => {
-    setSelectedDate(date.dateString); // Usa date.dateString directamente
-  };
-  
-  const formatFecha = (fecha) => {
-    const fechaObj = new Date(fecha);
-    return fechaObj.toLocaleDateString("es-ES", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
-  };
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchHistorial().then(() => {
-      setRefreshing(false); 
-    });
-  };
-  
   const fetchHistorial = async () => {
     try {
       const historialCollection = collection(db, "historialVentas");
@@ -131,6 +121,55 @@ const Historial = () => {
     }
   };
 
+  const calcularTotalPorFecha = (historialData) => {
+    const totalPorFecha = {};
+    historialData.forEach((item) => {
+      const fecha = formatFecha(item.fecha);
+      const totalCompra = parseFloat(item.totalCompra);
+      totalPorFecha[fecha] = (totalPorFecha[fecha] || 0) + totalCompra;
+    });
+    setTotalPorFecha(totalPorFecha);
+  };
+
+  const calcularTotalPorMes = (historialData) => {
+    const totalPorMes = {};
+    historialData.forEach((item) => {
+      const [day, month, year] = item.fecha.split("/");
+      const yearMonth = `${year}-${month}`;
+      if (!totalPorMes[yearMonth]) {
+        totalPorMes[yearMonth] = 0;
+      }
+      totalPorMes[yearMonth] += parseFloat(item.totalCompra);
+    });
+    setTotalPorMes(totalPorMes);
+  };
+
+  const filtrarHistorialPorFecha = (fecha) => {
+    const [year, month, day] = fecha.split("-");
+    const formattedFecha = `${day}/${month}/${year.slice(2)}`;
+    const filteredHistorial = historialCompleto.filter((item) => {
+      return item.fecha === formattedFecha;
+    });
+    setHistorialFiltrado(filteredHistorial);
+  };
+
+  const handleDateSelect = (date) => {
+    setSelectedDate(date.dateString);
+    filtrarHistorialPorFecha(date.dateString);
+  };
+
+  const formatFecha = (fecha) => {
+    const [day, month, year] = fecha.split("/");
+    return `${day}/${month}/${year}`;
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchHistorial().then(() => {
+      setRefreshing(false);
+    });
+  };
+
   const renderItem = ({ item }) => (
     <TouchableOpacity
       onPress={() => {
@@ -147,17 +186,16 @@ const Historial = () => {
 
   return (
     <View style={styles.container}>
-<Calendar
-  onDayPress={(date) => {
-    handleDateSelect(date);
-    filtrarHistorialPorFecha(date.dateString);
-  }}
-  markedDates={{
-    [selectedDate]: { selected: true, selectedColor: "blue" },
-  }}
-  style={{ width: "100%" }}
-/>
-
+      <Calendar
+        onDayPress={(date) => {
+          handleDateSelect(date);
+        }}
+        markedDates={{
+          [selectedDate]: { selected: true, selectedColor: "#1C2120" },
+        }}
+        style={styles.calendario}
+        locale={"es"}
+      />
       <FlatList
         data={historialFiltrado}
         renderItem={renderItem}
@@ -178,7 +216,7 @@ const Historial = () => {
         <Text style={styles.totalText}>Total por Mes:</Text>
         {Object.keys(totalPorMes).map((yearMonth) => (
           <Text key={yearMonth}>
-            {yearMonth}: {totalPorMes[yearMonth]}
+            {yearMonth} : {totalPorMes[yearMonth]}
           </Text>
         ))}
       </View>
@@ -191,6 +229,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  calendario: {
+    width: Dimensions.get("window").width,
+    marginBottom: 12,
   },
   itemContainer: {
     width: 350,

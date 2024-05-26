@@ -4,7 +4,7 @@
     "slug": "montino",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/Montino.png",
+    "icon": "./assets/panda_sin.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -43,7 +43,7 @@
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.ACCESS_MEDIA_LOCATION"
       ],
-      "package": "com.sebaquintana.appminiMarket"
+      "package": "com.gonza96472.montino"
     },
     "web": {
       "favicon": "./assets/panda_sin.ico"
