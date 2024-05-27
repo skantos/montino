@@ -7,11 +7,14 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
+  Image,
 } from "react-native";
 import { doc, onSnapshot, setDoc } from "firebase/firestore";
 import { db, auth } from "../dataBase/Firebase";
 import { updatePassword as updateFirebasePassword } from "firebase/auth";
 import { EditarUserStyles } from "../styles/EditarUserEstilo";
+
+
 
 const EditarUser = () => {
   const [userData, setUserData] = useState(null);
@@ -79,8 +82,13 @@ const EditarUser = () => {
 
   return (
     <ScrollView>
+
+
       <View style={EditarUserStyles.container}>
         <Text style={EditarUserStyles.textTitle}>Editar Usuario</Text>
+        <Image source={require("../images/editar.png")}
+          style={EditarUserStyles.logoImage}
+        />
         <Text style={EditarUserStyles.text}>Nombre</Text>
         <TextInput
           style={EditarUserStyles.input}

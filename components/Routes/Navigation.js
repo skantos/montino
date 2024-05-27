@@ -122,18 +122,7 @@ export default function Navigation() {
           options={{
             tabBarLabel: "",
             tabBarIcon: ({ color, size }) => (
-              <View
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 5,
-                  backgroundColor: "#1C2120",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <AntDesign name="barcode" size={size} color={"#FFFFFF"} />
-              </View>
+              <AntDesign name="barcode" size={size} color={color} />
             ),
           }}
         />
@@ -238,10 +227,12 @@ function MyTabBar({ state, descriptors, navigation }) {
                 flex: 1,
                 justifyContent: "center",
                 alignItems: "center",
+                backgroundColor: isFocused ? "#1C2120" : "#f5f5f5", // Cambia el fondo aquí
+                borderRadius: isFocused ? 10 : 0, // Opcional: cambia la forma cuando está enfocado
               }}
             >
               {options.tabBarIcon({
-                color: isFocused ? "#0077B6" : "#000",
+                color: isFocused ? "#D4D4D4" : "#1C2120",
                 size: 24,
               })}
             </View>

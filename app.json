@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "montino",
+    "name": "Panda Montino",
     "slug": "montino",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/panda_sin.png",
+    "icon": "./image/panda_recuperar.ico",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",

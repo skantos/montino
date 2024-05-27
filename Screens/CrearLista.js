@@ -26,7 +26,7 @@ const CrearLista = () => {
     categoria: "",
     precio: "",
     precioOferta: "",
-    cantidad: "", // Añadir el campo cantidad
+    cantidad: "",
   });
   const [message, setMessage] = useState(null);
   const [categorias, setCategorias] = useState([]);
@@ -78,8 +78,10 @@ const CrearLista = () => {
         nombreProducto: state.nombreProducto,
         categoria: state.categoria,
         precio: parseFloat(state.precio),
-        precioOferta: state.precioOferta ? parseFloat(state.precioOferta) : null,
-        cantidad: state.cantidad ? parseInt(state.cantidad, 10) : null, // Añadir la cantidad opcional
+        precioOferta: state.precioOferta
+          ? parseFloat(state.precioOferta)
+          : null,
+        cantidad: state.cantidad ? parseInt(state.cantidad, 10) : null,
       };
 
       await setDoc(doc(db, "productos", state.idProducto), producto);
@@ -91,7 +93,7 @@ const CrearLista = () => {
         categoria: "",
         precio: "",
         precioOferta: "",
-        cantidad: "", // Resetear el campo cantidad
+        cantidad: "",
       });
     } catch (error) {
       console.error("Error al guardar el producto:", error);
@@ -248,6 +250,7 @@ const CrearLista = () => {
           onChangeText={(value) => handleChangeText("nombreProducto", value)}
         />
       </View>
+      
       <View style={styles.inputContainer}>
         <Text>Seleccione la categoría</Text>
         <ScrollView>
@@ -263,6 +266,7 @@ const CrearLista = () => {
           </Picker>
         </ScrollView>
       </View>
+
       <View style={styles.inputContainer}>
         <Text>Ingrese el precio</Text>
         <TextInput
