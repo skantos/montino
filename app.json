@@ -46,13 +46,12 @@
       "package": "com.gonza96472.montino"
     },
     "web": {
-      "favicon": "./assets/panda_sin.ico"
+      "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
         "projectId": "31ac49b8-c6f9-46ca-9e01-e63af1566313"
       }
-    },
-    "owner": "gonza96472"
+    }
   }
 }
