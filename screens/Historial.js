@@ -13,45 +13,19 @@ import { collection, getDocs } from "firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { format } from "date-fns";
+import DetallesCarrito from './DetallesProductos';
 
 LocaleConfig.locales["es"] = {
   monthNames: [
-    "Enero",
-    "Febrero",
-    "Marzo",
-    "Abril",
-    "Mayo",
-    "Junio",
-    "Julio",
-    "Agosto",
-    "Septiembre",
-    "Octubre",
-    "Noviembre",
-    "Diciembre",
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
   ],
   monthNamesShort: [
-    "Ene.",
-    "Feb.",
-    "Mar.",
-    "Abr.",
-    "May.",
-    "Jun.",
-    "Jul.",
-    "Ago.",
-    "Sept.",
-    "Oct.",
-    "Nov.",
-    "Dic.",
+    "Ene.", "Feb.", "Mar.", "Abr.", "May.", "Jun.",
+    "Jul.", "Ago.", "Sept.", "Oct.", "Nov.", "Dic.",
   ],
-  dayNames: [
-    "Domingo",
-    "Lunes",
-    "Martes",
-    "Miércoles",
-    "Jueves",
-    "Viernes",
-    "Sábado",
-  ],
+  dayNames: ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"],
   dayNamesShort: ["Dom.", "Lun.", "Mar.", "Mié.", "Jue.", "Vie.", "Sáb."],
   today: "Hoy",
 };
@@ -83,7 +57,6 @@ const Historial = () => {
 
   const handleRefresh = async () => {
     setRefreshing(true);
-
     try {
       await fetchHistorial();
     } catch (error) {
@@ -103,81 +76,85 @@ const Historial = () => {
 
   const fetchHistorial = async () => {
     try {
-      const historialCollection = collection(db, "historialVentas");
-      const historialSnapshot = await getDocs(historialCollection);
-      const historialData = historialSnapshot.docs.map((doc) => {
+      const ventasCollection = collection(db, "sales");
+      const ventasSnapshot = await getDocs(ventasCollection);
+      const ventasData = ventasSnapshot.docs.map((doc) => {
         const data = doc.data();
-        const totalCompra = parseFloat(data.totalCompra);
-        return {
-          id: doc.id,
-          ...data,
-          totalCompra: isNaN(totalCompra) ? 0 : totalCompra,
-        };
-      });
-      setHistorialCompleto(historialData);
-      calcularTotalPorMes(historialData);
+        if (data.fechaVenta && data.fechaVenta.seconds) {
+          const fechaVenta = format(new Date(data.fechaVenta.seconds * 1000), "dd/MM/yyyy");
+          return {
+            id: doc.id,
+            ...data,
+            fechaVenta: fechaVenta || "Desconocida",
+            totalVenta: data.totalVenta || 0, // Asegurarse de que totalVenta no sea undefined
+          };
+        } else {
+          console.error("Fecha de venta inválida:", data.fechaVenta);
+          return null;
+        }
+      }).filter(item => item !== null); // Filtrar valores nulos
+      setHistorialCompleto(ventasData);
+      calcularTotalPorMes(ventasData);
     } catch (error) {
       console.error("Error fetching historial:", error);
     }
   };
 
-  const calcularTotalPorFecha = (historialData) => {
+  const calcularTotalPorFecha = (ventasData) => {
     let total = 0;
-    historialData.forEach((item) => {
-      total += parseFloat(item.totalCompra);
+    ventasData.forEach((venta) => {
+      if (venta.totalVenta) {
+        total += parseFloat(venta.totalVenta) || 0;
+      }
     });
     setTotalPorFecha(total);
   };
 
-  const calcularTotalPorMes = (historialData) => {
+  const calcularTotalPorMes = (ventasData) => {
     const totalPorMes = {};
-    historialData.forEach((item) => {
-      const [day, month, year] = item.fecha.split("/");
+    ventasData.forEach((venta) => {
+      const [day, month, year] = venta.fechaVenta.split("/");
       const yearMonth = `${year}-${month}`;
       if (!totalPorMes[yearMonth]) {
         totalPorMes[yearMonth] = 0;
       }
-      totalPorMes[yearMonth] += parseFloat(item.totalCompra);
+      totalPorMes[yearMonth] += parseFloat(venta.totalVenta) || 0;
     });
     setTotalPorMes(totalPorMes);
   };
 
+  const handleDateSelect = (date) => {
+    if (!date || !date.dateString) return;
+    setSelectedDate(date.dateString);
+    const formattedFecha = format(new Date(date.timestamp), "dd/MM/yyyy");
+    filtrarHistorialPorFecha(formattedFecha);
+  };
+
   const filtrarHistorialPorFecha = (fecha) => {
-    const [year, month, day] = fecha.split("-");
-    const formattedFecha = `${day}/${month}/${year.slice(2)}`;
-    const filteredHistorial = historialCompleto.filter((item) => {
-      return item.fecha === formattedFecha;
+    if (!fecha || !Array.isArray(historialCompleto)) {
+      console.error("Invalid fecha or historialCompleto");
+      return;
+    }
+    const filteredHistorial = historialCompleto.filter((venta) => {
+      return venta.fechaVenta === fecha;
     });
     setHistorialFiltrado(filteredHistorial);
-  };
-
-  const handleDateSelect = (date) => {
-    setSelectedDate(date.dateString);
-    filtrarHistorialPorFecha(date.dateString);
-  };
-
-  const formatFecha = (fecha) => {
-    const [day, month, year] = fecha.split("/");
-    return `${day}/${month}/${year}`;
-  };
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchHistorial().then(() => {
-      setRefreshing(false);
-    });
   };
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
       onPress={() => {
-        navigation.navigate("DetallesCarrito", { carritoId: item.id });
+        if (item.productos) {
+          navigation.navigate("DetallesCarrito", { productos: item.productos });
+        } else {
+          console.error("No hay productos en el ítem", item);
+        }
       }}
     >
       <View style={styles.itemContainer}>
-        <Text>Vendedor: {item.usuario?.firstName}</Text>
-        <Text>Fecha Compra: {formatFecha(item.fecha)}</Text>
-        <Text>Total Compra: {item.totalCompra}</Text>
+        <Text>ID Usuario: {item.idUsuario || "Desconocido"}</Text>
+        <Text>Fecha Venta: {item.fechaVenta || "Desconocida"}</Text>
+        <Text>Total Venta: ${item.totalVenta || 0}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -194,9 +171,7 @@ const Historial = () => {
       </TouchableOpacity>
       {calendarVisible && (
         <Calendar
-          onDayPress={(date) => {
-            handleDateSelect(date);
-          }}
+          onDayPress={handleDateSelect}
           markedDates={{
             [selectedDate]: { selected: true, selectedColor: "#1C2120" },
           }}
@@ -209,20 +184,20 @@ const Historial = () => {
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
       />
       <View style={styles.totalContainer}>
         <Text style={styles.totalText}>Total por Día:</Text>
         <Text>
-          {selectedDate}: {totalPorFecha}
+          {selectedDate}: ${totalPorFecha}
         </Text>
       </View>
       <View style={styles.totalContainer}>
         <Text style={styles.totalText}>Total por Mes:</Text>
         {Object.keys(totalPorMes).map((yearMonth) => (
           <Text key={yearMonth}>
-            {yearMonth} : {totalPorMes[yearMonth]}
+            {yearMonth} : ${totalPorMes[yearMonth] || 0}
           </Text>
         ))}
       </View>

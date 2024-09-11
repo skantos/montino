@@ -5,59 +5,53 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  ScrollView,
   Alert,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
 import { useNavigation } from "@react-navigation/native";
 import { db } from "../dataBase/Firebase";
-import { doc, updateDoc, collection, getDocs } from "firebase/firestore";
+import { doc, updateDoc } from "firebase/firestore";
 
 const ActualizarLista = ({ route }) => {
   const { id } = route.params.producto;
-  const [nuevaCategoria, setNuevaCategoria] = useState(route.params.producto.categoria);
-  const [nuevoNombre, setNuevoNombre] = useState(route.params.producto.nombreProducto);
-  const [nuevoPrecio, setNuevoPrecio] = useState(`${route.params.producto.precio}`);
-  const [nuevoPrecioOferta, setNuevoPrecioOferta] = useState(`${route.params.producto.precioOferta}`);
-  const [nuevaCantidad, setNuevaCantidad] = useState(route.params.producto.cantidad || "0");
-  const [categorias, setCategorias] = useState([]);
-  const [refreshing, setRefreshing] = useState(false);
+  const [nuevaCategoria, setNuevaCategoria] = useState(route.params.producto.categoriaProducto || '');
+  const [nuevoNombre, setNuevoNombre] = useState(route.params.producto.nombreProducto || '');
+  const [nuevoPrecio, setNuevoPrecio] = useState(`${route.params.producto.precioOriginal || ''}`);
+  const [nuevoprecioProducto, setNuevoprecioProducto] = useState(`${route.params.producto.precioProducto || ''}`);
+  const [nuevaCantidad, setNuevaCantidad] = useState(`${route.params.producto.cantidadProducto || ''}`);
   const navigation = useNavigation();
 
   useEffect(() => {
-    obtenerCategorias();
-  }, []);
+    console.log('Producto recibido:', route.params.producto);
+    setNuevaCategoria(route.params.producto.categoriaProducto || '');
+    setNuevoNombre(route.params.producto.nombreProducto || '');
+    setNuevoPrecio(`${route.params.producto.precioOriginal || ''}`);
+    setNuevoprecioProducto(`${route.params.producto.precioProducto || ''}`);
+    setNuevaCantidad(`${route.params.producto.cantidadProducto || ''}`);
+  }, [route.params.producto]);
 
   const handleActualizarProducto = async () => {
+    // Validaciones básicas
+    if (!nuevoNombre || !nuevaCategoria || !nuevoPrecio || isNaN(nuevoPrecio) || !nuevoprecioProducto || isNaN(nuevoprecioProducto) || !nuevaCantidad || isNaN(nuevaCantidad)) {
+      Alert.alert("Error", "Por favor, completa todos los campos correctamente.");
+      return;
+    }
+  
     try {
       const nuevosValores = {
-        id: id,
-        categoria: nuevaCategoria,
+        categoriaProducto: nuevaCategoria,
         nombreProducto: nuevoNombre,
-        precio: parseFloat(nuevoPrecio),
-        precioOferta: parseFloat(nuevoPrecioOferta),
-        cantidad: parseInt(nuevaCantidad),
+        precioOriginal: parseFloat(nuevoPrecio),
+        precioProducto: parseFloat(nuevoprecioProducto),
+        cantidadProducto: parseInt(nuevaCantidad),
       };
-
+  
       await updateDoc(doc(db, "productos", id), nuevosValores);
-
+  
+      Alert.alert("Éxito", "Producto actualizado con éxito.");
       navigation.goBack();
     } catch (error) {
       console.error("Error al actualizar el producto:", error);
-    }
-  };
-
-  const obtenerCategorias = async () => {
-    try {
-      setRefreshing(true);
-      const categoriasSnapshot = await getDocs(collection(db, "categorias"));
-      const categoriasData = categoriasSnapshot.docs.map((doc) => doc.data().nombreCategoria);
-      setCategorias(categoriasData);
-      setRefreshing(false);
-    } catch (error) {
-      console.error("Error al obtener las categorías:", error);
-      Alert.alert("Error", "Hubo un error al obtener las categorías.");
-      setRefreshing(false);
+      Alert.alert("Error", "Hubo un problema al actualizar el producto.");
     }
   };
 
@@ -65,6 +59,7 @@ const ActualizarLista = ({ route }) => {
     <View style={styles.container}>
       <Text style={styles.label}>ID:</Text>
       <TextInput style={styles.input} value={id} editable={false} />
+
       <Text style={styles.label}>Nombre del Producto:</Text>
       <TextInput
         style={styles.input}
@@ -73,38 +68,31 @@ const ActualizarLista = ({ route }) => {
       />
 
       <Text style={styles.label}>Categoría:</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={nuevaCategoria}
-          onValueChange={(itemValue) => setNuevaCategoria(itemValue)}
-        >
-          <Picker.Item label="Seleccione una categoría" value="" />
-          {categorias.map((categoria, index) => (
-            <Picker.Item key={index} label={categoria} value={categoria} />
-          ))}
-        </Picker>
-      </View>
+      <TextInput
+        style={styles.input}
+        value={nuevaCategoria}
+        onChangeText={(text) => setNuevaCategoria(text)}
+      />
 
-      <Text style={styles.label}>Precio:</Text>
+      <Text style={styles.label}>Precio Detalle:</Text>
       <TextInput
         style={styles.input}
         value={nuevoPrecio}
         onChangeText={(text) => setNuevoPrecio(text)}
         keyboardType="numeric"
       />
-
-      <Text style={styles.label}>Precio de Oferta:</Text>
+      <Text style={styles.label}>Precio de Venta:</Text>
       <TextInput
         style={styles.input}
-        value={nuevoPrecioOferta}
-        onChangeText={(text) => setNuevoPrecioOferta(text)}
+        value={nuevoprecioProducto}
+        onChangeText={(text) => setNuevoprecioProducto(text)}
         keyboardType="numeric"
       />
       <Text style={styles.label}>Cantidad:</Text>
       <TextInput
         style={styles.input}
         value={nuevaCantidad}
-        onChangeText={(text) => setNuevaCantidad(text)}
+        onChangeText={setNuevaCantidad}
         keyboardType="numeric"
       />
       <TouchableOpacity onPress={handleActualizarProducto} style={styles.boton}>
@@ -128,16 +116,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#000",
     paddingVertical: 8,
-    paddingLeft: 40,
+    paddingLeft: 10,
     color: "#333",
-    borderRadius: 10,
-    marginBottom: 20,
-  },
-  pickerContainer: {
-    width: "100%",
-    backgroundColor: "#D4D4D4",
-    borderBottomWidth: 1,
-    borderBottomColor: "#000",
     borderRadius: 10,
     marginBottom: 20,
   },

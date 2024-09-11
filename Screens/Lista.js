@@ -14,9 +14,9 @@ import { useNavigation } from "@react-navigation/native";
 import { db } from "../dataBase/Firebase";
 import {
   collection,
-  getDocs,
   query,
   where,
+  onSnapshot,
   deleteDoc,
   doc,
 } from "firebase/firestore";
@@ -31,42 +31,47 @@ const Lista = () => {
   const [productoExpandido, setProductoExpandido] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  const obtenerProductos = async () => {
-    try {
-      const productosCollection = collection(db, "productos");
-      let queryProductos = productosCollection;
+  // Obtener productos desde Firestore y aplicar filtros
+  const obtenerProductos = () => {
+    setLoading(true);
+    const productosCollection = collection(db, "productos");
+    let queryProductos = query(productosCollection);
 
-      if (filtro) {
-        queryProductos = query(
-          productosCollection,
-          where("nombreProducto", ">=", filtro),
-          where("nombreProducto", "<=", filtro + "\uf8ff")
-        );
-      }
+    if (filtro) {
+      queryProductos = query(
+        productosCollection,
+        where("nombreProducto", ">=", filtro),
+        where("nombreProducto", "<=", filtro + "\uf8ff"),
+        where("categoriaProducto", ">=", filtro),
+        where("categoriaProducto", "<=", filtro + "\uf8ff")
+      );
+    }
 
-      const productosSnapshot = await getDocs(queryProductos);
-      const listaProductos = productosSnapshot.docs.map((doc) => ({
+    // Escuchar cambios en tiempo real
+    const unsubscribe = onSnapshot(queryProductos, (snapshot) => {
+      const listaProductos = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-
       setProductos(listaProductos);
       setLoading(false);
-    } catch (error) {
+    }, (error) => {
       console.error("Error al obtener productos:", error);
       setLoading(false);
-    }
-  };
+    });
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await obtenerProductos();
-    setRefreshing(false);
+    return () => unsubscribe(); // Limpiar suscripción en caso de desmontaje del componente
   };
 
   useEffect(() => {
     obtenerProductos();
   }, [filtro]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    obtenerProductos(); // Refrescar productos
+    setRefreshing(false);
+  };
 
   const handleEliminarProducto = async (id) => {
     try {
@@ -82,10 +87,10 @@ const Lista = () => {
             text: "Eliminar",
             onPress: async () => {
               await deleteDoc(doc(db, "productos", id));
-              const nuevosProductos = productos.filter(
-                (producto) => producto.id !== id
+              // Eliminar producto del estado local
+              setProductos((prevProductos) =>
+                prevProductos.filter((producto) => producto.id !== id)
               );
-              setProductos(nuevosProductos);
               if (productoExpandido === id) {
                 setProductoExpandido(null);
               }
@@ -115,9 +120,9 @@ const Lista = () => {
 
   const renderizarItem = ({ item }) => {
     let containerStyle = styles.itemContainer;
-    if (item.cantidad <= 10) {
+    if (item.cantidadProducto <= 10) {
       containerStyle = { ...containerStyle, backgroundColor: "#ffcccc" };
-    } else if (item.cantidad <= 20) {
+    } else if (item.cantidadProducto <= 20) {
       containerStyle = { ...containerStyle, backgroundColor: "#D9F2AA" };
     }
 
@@ -125,12 +130,11 @@ const Lista = () => {
       <View style={containerStyle}>
         <TouchableOpacity onPress={() => handlePresionarProducto(item.id)}>
           <View style={styles.textoContainer}>
-            <Text
-              style={styles.nombre}
-            >{`Nombre: ${item.nombreProducto}`}</Text>
-            <Text style={styles.detalle}>{`Categoría: ${item.categoria}`}</Text>
-            <Text style={styles.detalle}>{`Precio/u: ${item.precio}`}</Text>
-            <Text style={styles.detalle}>{`Cantidad: ${item.cantidad}`}</Text>
+            <Text style={styles.nombre}>{`Nombre: ${item.nombreProducto}`}</Text>
+            <Text style={styles.detalle}>{`Categoría: ${item.categoriaProducto}`}</Text>
+            <Text style={styles.detalle}>{`Precio/u: ${item.precioProducto}`}</Text>
+            <Text style={styles.detalle}>{`Precio/Detalle: ${item.precioOriginal}`}</Text>
+            <Text style={styles.detalle}>{`Cantidad: ${item.cantidadProducto}`}</Text>
             {productoExpandido === item.id && (
               <View style={styles.botonesContainer}>
                 <TouchableOpacity

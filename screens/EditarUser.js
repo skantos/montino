@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,33 +11,30 @@ import {
 } from "react-native";
 import { doc, onSnapshot, setDoc } from "firebase/firestore";
 import { db, auth } from "../dataBase/Firebase";
-import { updatePassword as updateFirebasePassword } from "firebase/auth";
+import { updatePassword } from "firebase/auth";
 import { EditarUserStyles } from "../styles/EditarUserEstilo";
-
-
 
 const EditarUser = () => {
   const [userData, setUserData] = useState(null);
   const [newName, setNewName] = useState("");
-  const [newApellido, setNewApellido] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [newTelefono, setNewTelefono] = useState("");
   const [loading, setLoading] = useState(true);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const identifyUser = auth.currentUser;
 
     if (identifyUser) {
       const userRef = doc(db, "users", identifyUser.uid);
-      onSnapshot(userRef, (snapshot) => {
+      const unsubscribe = onSnapshot(userRef, (snapshot) => {
         const userData = snapshot.data();
         setUserData(userData);
-        setNewName(userData.firstName || "");
-        setNewApellido(userData.lastName || "");
-        setNewPassword(userData.password || "");
-        setNewTelefono(userData.phone || "");
+        setNewName(userData.nombreUsuario || "");
+        setNewPassword(""); // No preestablecer la contraseña, dejar campo vacío
         setLoading(false);
       });
+
+      // Cleanup subscription on unmount
+      return () => unsubscribe();
     }
   }, []);
 
@@ -49,16 +46,14 @@ const EditarUser = () => {
         const userDocRef = doc(db, "users", identifyUser.uid);
 
         const updatedUserData = {
-          nombre: newName || userData.firstName,
-          apellido: newApellido || userData.lastName,
-          telefono: newTelefono || userData.phone,
-          password: newPassword || userData.password,
+          nombreUsuario: newName || userData.nombreUsuario,
+          emailUsuario: userData.emailUsuario // No permitas que el email sea modificado
         };
 
         await setDoc(userDocRef, updatedUserData, { merge: true });
 
         if (newPassword) {
-          await updateFirebasePassword(identifyUser, newPassword);
+          await updatePassword(identifyUser, newPassword);
           console.log("Contraseña actualizada con éxito");
         }
 
@@ -67,7 +62,7 @@ const EditarUser = () => {
       }
     } catch (error) {
       console.error("Error al actualizar datos del usuario:", error);
-      Alert.alert("Error al actualizar datos del usuario:", error);
+      Alert.alert("Error al actualizar datos del usuario", error.message);
     }
   };
 
@@ -81,12 +76,11 @@ const EditarUser = () => {
   }
 
   return (
-    <ScrollView>
-
-
+    <ScrollView style={EditarUserStyles.scrollView}>
       <View style={EditarUserStyles.container}>
         <Text style={EditarUserStyles.textTitle}>Editar Usuario</Text>
-        <Image source={require("../images/editar.png")}
+        <Image
+          source={require("../images/editar.png")}
           style={EditarUserStyles.logoImage}
         />
         <Text style={EditarUserStyles.text}>Nombre</Text>
@@ -96,26 +90,13 @@ const EditarUser = () => {
           value={newName}
           onChangeText={(text) => setNewName(text)}
         />
-        <Text style={EditarUserStyles.text}>Apellido</Text>
-        <TextInput
-          style={EditarUserStyles.input}
-          placeholder="Apellido"
-          value={newApellido}
-          onChangeText={(text) => setNewApellido(text)}
-        />
         <Text style={EditarUserStyles.text}>Contraseña</Text>
         <TextInput
           style={EditarUserStyles.input}
           placeholder="Contraseña"
           value={newPassword}
           onChangeText={(text) => setNewPassword(text)}
-        />
-        <Text style={EditarUserStyles.text}>Teléfono</Text>
-        <TextInput
-          style={EditarUserStyles.input}
-          placeholder="Teléfono"
-          value={newTelefono}
-          onChangeText={(text) => setNewTelefono(text)}
+          secureTextEntry // Para ocultar la contraseña
         />
         <TouchableOpacity
           onPress={actualizarDatosUsuario}

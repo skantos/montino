@@ -13,16 +13,18 @@ import { StatusBar } from "react-native";
 
 import Lista from "../../screens/Lista";
 import ActualizarLista from "../../screens/ActualizarLista";
-import CrearCategoria from "../../screens/CrearCategoria";
+import Historial from "../../screens/Historial";
+import EditarUser from "../../screens/EditarUser";
+import Perfil from "../../screens/Cuenta";
+import CreateAccount from "../../screens/CrearCuenta";
 import Login from "../../screens/Login";
 import ForgotPassword from "../../screens/RecuperContrasena";
-import EscanerCodigoBarras from "../../screens/CodigoBarras";
-import CrearLista from "../../screens/CrearLista";
-import Historial from "../../screens/Historial";
-import CreateAccount from "../../screens/CrearCuenta";
-import Perfil from "../../screens/Cuenta";
-import EditarUser from "../../screens/EditarUser";
-import DetallesCarrito from "../../screens/DetallesCarrito";
+
+
+// import CrearCategoria from "../../screens/CrearCategoria";
+// import EscanerCodigoBarras from "../../screens/CodigoBarras";
+// import CrearLista from "../../screens/CrearLista";
+// import DetallesCarrito from "../../screens/DetallesCarrito";
 
 import Loading from "../Loading";
 
@@ -79,11 +81,11 @@ export default function Navigation() {
             }}
           />
           <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
-          <Stack.Screen name="Crear Categoria" component={CrearCategoria} />
+          {/* <Stack.Screen name="Crear Categoria" component={CrearCategoria} /> */}
           <Stack.Screen name="ActualizarLista" component={ActualizarLista} />
           <Stack.Screen name="CreateAccount" component={CreateAccount} />
           <Stack.Screen name="Editar Usuario" component={EditarUser} />
-          <Stack.Screen name="DetallesCarrito" component={DetallesCarrito} />
+          {/* <Stack.Screen name="DetallesCarrito" component={DetallesCarrito} /> */}
         </Stack.Navigator>
       </>
     );
@@ -106,7 +108,7 @@ export default function Navigation() {
             ),
           }}
         />
-        <Tab.Screen
+        {/* <Tab.Screen
           name="CrearLista"
           component={CrearLista}
           options={{
@@ -115,8 +117,8 @@ export default function Navigation() {
               <Entypo name="add-to-list" size={size} color={color} />
             ),
           }}
-        />
-        <Tab.Screen
+        /> */}
+        {/* <Tab.Screen
           name="EscanerCodigoBarras"
           component={EscanerCodigoBarras}
           options={{
@@ -125,7 +127,7 @@ export default function Navigation() {
               <AntDesign name="barcode" size={size} color={color} />
             ),
           }}
-        />
+        /> */}
         <Tab.Screen
           name="Historial"
           component={Historial}

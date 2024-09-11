@@ -22,10 +22,13 @@ function Perfil() {
     const identifyUser = auth.currentUser;
     if (identifyUser) {
       const userRef = doc(db, "users", identifyUser.uid);
-      onSnapshot(userRef, (snapshot) => {
+      const unsubscribe = onSnapshot(userRef, (snapshot) => {
         setUser(snapshot.data());
         setLoading(false);
       });
+
+      // Cleanup subscription on unmount
+      return () => unsubscribe();
     }
   }, []);
 
@@ -36,7 +39,7 @@ function Perfil() {
         navigation.replace("Login");
         Alert.alert("Cuenta cerrada");
       })
-      .catch((error) => alert(error.message));
+      .catch((error) => Alert.alert(error.message));
   };
 
   if (loading) {
@@ -51,7 +54,7 @@ function Perfil() {
   return (
     <View style={CuentaStyles.container}>
       <View style={CuentaStyles.header}>
-        <Text style={CuentaStyles.logo}>Panda Buy</Text>
+        <Text style={CuentaStyles.logo}>Montino</Text>
         <View style={CuentaStyles.buttonContainer}>
           <TouchableOpacity
             style={CuentaStyles.iconButton}
@@ -72,13 +75,14 @@ function Perfil() {
         <Text>No hay datos</Text>
       ) : (
         <View style={CuentaStyles.profile}>
-          <Text style={CuentaStyles.subtitle}>Perfil de Panda</Text>
+          <Text style={CuentaStyles.subtitle}>Perfil de Montino</Text>
           <Image
             source={require("../images/panda_recuperar.png")}
             style={CuentaStyles.logoImage}
           />
-          {renderProfileInfo("user", `${user.firstName} ${user.lastName}`)}
-          {renderProfileInfo("envelope-o", user.email)}
+          {renderProfileInfo("user", user.nombreUsuario)}
+          {renderProfileInfo("envelope-o", user.emailUsuario)}
+          {renderProfileInfo("briefcase", user.rolUsuario)}
         </View>
       )}
     </View>
